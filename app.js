@@ -3,9 +3,25 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+const fs = require('fs');
+const config = require('./config.json');
+
+var httpProxy = require('http-proxy');
+
+const sslOptions = {
+  key : fs.readFileSync(config.ssl.keyFile),
+  cert : fs.readFileSync(config.ssl.certFile)
+}
+
+global.proxy = httpProxy.createProxyServer({
+  ssl : sslOptions,
+  secure : false
+});
 
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+
+// express security guide
+var helmet = require('helmet');
 
 var app = express();
 
@@ -13,14 +29,19 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
-app.use(logger('dev'));
+app.use(logger('combined'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+// security setting
+app.use(helmet());
+
+
+//app.use('/', indexRouter);
+//app.use('/users', usersRouter);
+app.use(indexRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
