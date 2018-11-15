@@ -5,19 +5,17 @@ const config = require('../config.json');
 
 router.use(function(req,res,next){
 
-  
+  /*
   console.log(req.headers);
   console.log('req.url = %s',req.url);
   console.log('req.ip = %s',req.ip);
   console.log('req.originalUrl = %s',req.originalUrl);
   console.log('req.header', req.headers)
-
+  */
   const {hostRules} = config;
   const matchedRule = hostRules.find((rule) => {
     return req.headers.host === rule.originalReqHost;
   })
-
-  console.log(matchedRule)
 
   if(matchedRule){    
     global.proxy.on('proxyReq', function(proxyReq, req, res, options){ 
